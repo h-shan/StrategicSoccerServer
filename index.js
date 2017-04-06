@@ -143,10 +143,10 @@ io.on('connection', function(clientSocket) {
     io.to(userList[i]["id"]).emit("pauseUpdate", pauseOption)
   })
 
-  clientSocket.on("move", function(opponentName, playerName, velX, velY) {
+  clientSocket.on("move", function(opponentName, playerName, moveInfo, time) {
     var i = getIndex(opponentName);
     if (i == -1) return;
-    io.to(userList[i]["id"]).emit("moveUpdate", playerName, velX, velY);
+    io.to(userList[i]["id"]).emit("moveUpdate", playerName, moveInfo, time);
   })
 
   clientSocket.on("positionVelocity", function(opponentName, posVelInfo, time) {
