@@ -28,7 +28,7 @@ function getIndex(playerName) {
       return i;
     }
   }
-  console.log("User with name " + playerName + " not found.")
+  console.log("User with name \"" + playerName + "\" not found.");
   return -1;
 }
 
@@ -48,10 +48,11 @@ io.on('connection', function(clientSocket) {
       if (userList[i]["id"] == clientSocket.id) {
         var opponent = userList[i]["opponent"];
         var oppIndex = getIndex(opponent);
-        userList[oppIndex]["opponent"] = ""
+        if (oppIndex != -1) {
+          userList[oppIndex]["opponent"] = ""
+          io.to(userList[oppIndex]["id"]).emit("gameOver");
+        }
         userList.splice(i, 1);
-
-        io.to(userList[oppIndex]["id"]).emit("gameOver");
         break;
       }
     }
@@ -81,9 +82,6 @@ io.on('connection', function(clientSocket) {
 
 
   clientSocket.on("connectUser", function(clientUsername) {
-      var message = "User " + clientUsername + " was connected.";
-      console.log(message);
-
       var userInfo = {};
       var foundUser = false;
       var i = getIndex(clientUsername);
@@ -92,14 +90,12 @@ io.on('connection', function(clientSocket) {
         userList[i]["id"] = clientSocket.id;
         userList[i]["isHost"] = false;
         userInfo = userList[i];
-        foundUser = true;
-      }
-
-      if (!foundUser) {
+      } else {
         userInfo["id"] = clientSocket.id;
         userInfo["username"] = clientUsername;
         userInfo["opponent"] = "";
         userList.push(userInfo);
+        console.log("User with name \"" + clientUsername + "\" is now connected.")
       }
 
       io.emit("userList", userList);
