@@ -48,9 +48,9 @@ io.on('connection', function(clientSocket) {
       if (userList[i]["id"] == clientSocket.id) {
         var opponent = userList[i]["opponent"];
         var oppIndex = getIndex(opponent);
-        userList.splice(i, 1);
-        if (oppIndex == -1) break;
         userList[oppIndex]["opponent"] = ""
+        userList.splice(i, 1);
+
         io.to(userList[oppIndex]["id"]).emit("gameOver");
         break;
       }
