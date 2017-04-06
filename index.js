@@ -7,7 +7,7 @@ var fs = require('fs');
 //   key: fs.readFileSync('./file.pem'),
 //   cert: fs.readFileSync('./file.crt')
 // };
- var serverPort = 3000;
+var serverPort = 3000;
 // var server = https.createServer(options, app);
 // var io = require('socket.io')(server);
 
@@ -19,7 +19,7 @@ var userList = [];
 var typingUsers = {};
 
 app.get('/', function(req, res){
-  res.send('<h1>Howard - Strategic Soccer Server</h1>');
+  res.send('<h1>Strategic Soccer Server</h1>');
 });
 
 function getIndex(playerName) {
@@ -28,6 +28,7 @@ function getIndex(playerName) {
       return i;
     }
   }
+  console.log("User with name " + playerName + " not found.")
   return -1;
 }
 
@@ -45,15 +46,18 @@ io.on('connection', function(clientSocket) {
     var clientUsername;
     for (var i=0; i<userList.length; i++) {
       if (userList[i]["id"] == clientSocket.id) {
+        var opponent = userList[i]["opponent"];
+        var oppIndex = getIndex(opponent);
         userList.splice(i, 1);
+        if (oppIndex == -1) break;
+        userList[oppIndex]["opponent"] = ""
+        io.to(userList[oppIndex]["id"]).emit("gameOver");
         break;
       }
     }
 
-    delete typingUsers[clientUsername];
     io.emit("userList", userList);
     io.emit("userExitUpdate", clientUsername);
-    io.emit("userTypingUpdate", typingUsers);
   });
 
 
@@ -121,14 +125,8 @@ io.on('connection', function(clientSocket) {
     var otherId;
     var index1 = getIndex(clientUsername);
     var index2 = getIndex(otherUsername);
-    if (index1 == -1) {
-      console.log("User with name " + clientUsername + " not found.")
-      return;
-    }
-    if (index2 == -1) {
-      console.log("User with name " + otherUsername + " not found.")
-      return;
-    }
+    if (index1 == -1) return;
+    if (index2 == -1) return;
     userList[index1]["opponent"] = otherUsername;
     userList[index1]["isHost"] = true;
     userList[index2]["opponent"] = clientUsername;
@@ -139,26 +137,31 @@ io.on('connection', function(clientSocket) {
 
   clientSocket.on("gameInfo", function(opponentName, mode, playerOption, flag, screenWidth, screenHeight, friction) {
     var i = getIndex(opponentName);
+    if (i == -1) return;
     io.to(userList[i]["id"]).emit("gameInfoUpdate", mode, playerOption, flag, screenWidth, screenHeight, friction);
   })
 
   clientSocket.on("pause", function(opponentName, pauseOption) {
     var i = getIndex(opponentName);
+    if (i == -1) return;
     io.to(userList[i]["id"]).emit("pauseUpdate", pauseOption)
   })
 
   clientSocket.on("move", function(opponentName, playerName, velX, velY) {
     var i = getIndex(opponentName);
+    if (i == -1) return;
     io.to(userList[i]["id"]).emit("moveUpdate", playerName, velX, velY);
   })
 
   clientSocket.on("positionVelocity", function(opponentName, posVelInfo, time) {
     var i = getIndex(opponentName);
+    if (i == -1) return;
     io.to(userList[i]["id"]).emit("positionVelocityUpdate", posVelInfo, time)
   })
 
   clientSocket.on("highlight", function(opponentName, playerToHighlight) {
     var i = getIndex(opponentName);
+    if (i == -1) return;
     io.to(userList[i]["id"]).emit("highlightUpdate", playerToHighlight)
   })
 
