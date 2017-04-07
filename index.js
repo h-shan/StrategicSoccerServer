@@ -92,10 +92,10 @@ io.on('connection', function(clientSocket) {
         } else {
           var currentName;
           for (var i = 1; true; i++) {
-            currentName = clientUsername + "(" + i + ")"
+            currentName = clientUsername + " (" + i + ")"
             if (getIndex(currentName) == -1) {
               userInfo["id"] = clientSocket.id;
-              userInfo["name"] = currentName;
+              userInfo["username"] = currentName;
               userInfo["opponent"] = "";
               userInfo["isHost"] = false;
               userList.push(userInfo);
@@ -111,7 +111,7 @@ io.on('connection', function(clientSocket) {
         userInfo["opponent"] = "";
         userList.push(userInfo);
       }
-      console.log("User with name \"" + clientUsername + "\" is now connected.")
+      console.log("User with name \"" + userInfo["username"] + "\" is now connected.")
 
       io.emit("userList", userList);
       io.emit("userConnectUpdate", userInfo)
