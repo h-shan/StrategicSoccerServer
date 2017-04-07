@@ -1,19 +1,18 @@
 var fs = require('fs');
-
-// var express = require('express');
-// var https = require('https');
-// var app = express();
-// var options = {
-//   key: fs.readFileSync('./file.pem'),
-//   cert: fs.readFileSync('./file.crt')
-// };
-var serverPort = 3000;
-// var server = https.createServer(options, app);
-// var io = require('socket.io')(server);
-
-var app = require('express')();
-var server = require('http').createServer(app);
+var express = require('express');
+var https = require('https');
+var app = express();
+var options = {
+   key: fs.readFileSync('/home/ec2-user/private-key.pem'),
+   cert: fs.readFileSync('/home/ec2-user/www_strategicsoccer_me.crt')
+};
+var serverPort = 3000; 
+var server = https.createServer(options, app);
 var io = require('socket.io')(server);
+
+// var app = require('express')();
+// var server = require('http').createServer(app);
+// var io = require('socket.io')(server);
 
 var userList = [];
 var typingUsers = {};
