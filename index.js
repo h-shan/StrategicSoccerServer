@@ -175,4 +175,10 @@ io.on('connection', function(clientSocket) {
     io.to(userList[i]["id"]).emit("highlightUpdate", playerToHighlight)
   })
 
+  clientSocket.on("goalScored", function(opponentName, goalBySender) {
+    var i = getIndex(opponentName);
+    if (i == -1) return;
+    io.to(userList[i]["id"]).emit("goalUpdate", goalBySender);
+  })
+
 });
