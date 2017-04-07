@@ -86,17 +86,32 @@ io.on('connection', function(clientSocket) {
       var foundUser = false;
       var i = getIndex(clientUsername);
       if (i != -1) {
-        userList[i]["opponent"] = ""
-        userList[i]["id"] = clientSocket.id;
-        userList[i]["isHost"] = false;
+        if (userList[i]["id"] == clientSocket.id) {
+          userList[i]["opponent"] = "";
+          userList[i]["isHost"] = false;
+        } else {
+          var currentName;
+          for (var i = 1; true; i++) {
+            currentName = clientUsername + "(" + i + ")"
+            if (getIndex(currentName) == -1) {
+              userInfo["id"] = clientSocket.id;
+              userInfo["name"] = currentName;
+              userInfo["opponent"] = "";
+              userInfo["isHost"] = false;
+              userList.push(userInfo);
+              io.to(clientSocket.id).emit("nameChange", currentName);
+              break;
+            }
+          }
+        }
         userInfo = userList[i];
       } else {
         userInfo["id"] = clientSocket.id;
         userInfo["username"] = clientUsername;
         userInfo["opponent"] = "";
         userList.push(userInfo);
-        console.log("User with name \"" + clientUsername + "\" is now connected.")
       }
+      console.log("User with name \"" + clientUsername + "\" is now connected.")
 
       io.emit("userList", userList);
       io.emit("userConnectUpdate", userInfo)
